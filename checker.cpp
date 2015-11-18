@@ -54,6 +54,7 @@ bool Checker::remove_last_vertex() {
    * promise to never pass the current_size */
   current_size--;
   current_hash[current_vertices[current_size]] = false;
+  return true;
 }
 
 bool Checker::process_current_state() {

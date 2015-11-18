@@ -10,7 +10,7 @@ default: sada
 
 sada: p1.o
 
-p1.o: ; $(CC) $(CFLAGS) main.cpp checker.cpp unionfind.cpp stack.cpp graph.cpp -o steiner $(LIBS)
+p1.o: ; $(CC) $(CFLAGS) main.cpp checker.cpp unionfind.cpp stack.cpp graph.cpp -o bin/steiner $(LIBS)
 
-clean: ; rm p?\.o
+clean: ; rm -rf bin/*
 

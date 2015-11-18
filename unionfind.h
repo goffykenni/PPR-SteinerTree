@@ -1,5 +1,5 @@
 #ifndef QUICK_UNION_H
-#define QUIKC_UNION
+#define QUICK_UNION_H
 /* quick_union.h
  * Optimalizovana implementace datove struktury unionfind. Hodi se
  * napriklad pro nalezeni kostry grafu, odstraneni cyklu z grafu

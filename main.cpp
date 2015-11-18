@@ -4,7 +4,7 @@
 #include <utility>
 #include "graph.h"
 #include "checker.h"
-#include "mpi.h"
+//#include "mpi.h"
 
 
 void print_graph(Graph*, int *label, int label_size);
@@ -22,20 +22,20 @@ int my_rank;
 
 int main(int argc, char *argv[]) {
 
-  MPI_Init(&argc, &argv);
-  MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+  //MPI_Init(&argc, &argv);
+  //MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
   
   Graph *g; int *terminal_set;
   int terminal_set_size;
   if (argc != 2 || read_input(g, terminal_set, terminal_set_size,
     argv[1]) != 0) {
     if (my_rank == 0)
-      std::cout << "Program error" << std::endl;
+      std::cout << "Program error, missing name of input file." << std::endl;
     return 1;
   }
   
   if (my_rank != 0) {
-    MPI_Finalize();
+    //MPI_Finalize();
     return 0;
   }
 
@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
     delete(terminal_set);  
   
   
-  MPI_Finalize();
+  // MPI_Finalize();
 }
 
 /* Nalezne nejmensi podgraf (z hlediska poctu vrcholu) daneho grafu
