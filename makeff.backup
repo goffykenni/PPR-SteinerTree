@@ -1,0 +1,26 @@
+# all after symbol '#' is comment
+
+# === which communication library to use ===
+CC	=	mpiCC      # for ethernet and infiniband networks
+
+CFLAGS	=
+LIBS	=	-lm
+
+default: sada
+
+sada: p4.o p2.o p3.o p4.o p1.o
+
+p4.o: solution_checker.cpp solution_checker.h ; $(CC) $(CFLAGS) -o p4.o solution_checker.cpp $(LIBS)
+
+p1.o: main.cpp graph.h stack.h solution_checker.h ; $(CC) $(CFLAGS) -o p1.o main.cpp $(LIBS)
+
+p2.o: stack.cpp stack.h ; $(CC) $(CFLAGS) -o p2.o stack.cpp $(LIBS)
+
+p3.o: graph.cpp graph.h ; $(CC) $(CFLAGS) -o p3.o graph.cpp $(LIBS)
+
+
+
+p5.o: unionfind.cpp unionfind.h ; $(CC) $(CFLAGS) -o p5.o unionfind.cpp $(LIBS)
+
+clean: ; rm p?\.o
+
