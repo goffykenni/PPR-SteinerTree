@@ -7,25 +7,46 @@ struct StFrame {
   int level;
   int value;
   StFrame *next;
+  StFrame *prev;
 };
+
+/**
+ * Implementuje oboustranny zasobnik pomoci oboustranného spojovaciho seznamu
+ */
 
 class Stack {
   private:
-    StFrame *data;
+    StFrame *top;
+    StFrame *bottom;
     int size;
   public:
     Stack();
     ~Stack();
     
-    StFrame peek();
+    // podivat se na vrsek
+    StFrame checkTop();
     
-    StFrame pop();
+    // sebrat zezhora
+    StFrame grabTop();
     
-    void push(int level, int value);
+    // zaradit na vrsek
+    void pushTop(int level, int value);
+    
+    // podivat se na spodek
+    StFrame checkBottom();
+    
+    // sebrat ze spoda
+    StFrame grabBottom();
+    
+    // zaradit do spoda
+    void pushBottom(int level, int value);
     
     bool isEmpty();
     
+    int getSize();
+    
     void Print();
+    void PrintReverse();
 };
 
 #endif
