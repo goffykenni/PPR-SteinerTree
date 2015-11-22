@@ -15,7 +15,10 @@ void initial_work_distribution(Graph*, int*, int, Checker*&, Stack*&);
 void accept_work(void*, int, Stack*&, Checker*&);
 
 // States
-enum State {INIT, WORKING, DONE};
+enum State {INIT, WORKING, IDLE, DONE};
+
+// Barvy pro procesy a tokeny
+enum Color {BLACK = 0, WHITE};
 
 // Message tags
 const int MSG_WORK_REQUEST = 1001;
@@ -25,20 +28,31 @@ const int MSG_TOKEN = 1004;
 const int MSG_TERMINATE = 1005;
 
 // Vypocetni konstanty
-// Musi byt aspon 0
-const int cut_height = 1;
+// Rezna vyska, musi byt aspon 0
+const int cut_height = 2;
+const int msg_check_cycles = 125;
 
 // Global variables
 int my_rank;
+State my_state;
+Color my_color;
+int my_count;
+bool has_token;
+
 int total_proc;
 int total_working_proc;
 MPI_Status status;
-State my_state;
 
 struct Solution {
   int size;
   int rank;  
 } my_solution;
+
+struct Token {
+  Color color;
+  int count;
+} token;
+
 /*             _{\ _{\{\/}/}/}__
              {/{/\}{/{/\}(\}{/\} _
             {/{/\}{/{/\}(_)\}{/{/\}  _
@@ -210,12 +224,13 @@ void initial_work_distribution(Graph* graph , int* terminal_set, int terminal_se
     }
     
     /* P0 rozvine svuj vlastni zasobnik podle toho, kolik toho daroval. */
-    for (int i = size - 1; i >= level_one_pos + 2; i--) {
+    st->pushTop(1, 0, level_two_pos);
+    if (size > 1)
+      st->pushTop(1, 1, 0);    
+    for (int i = level_one_pos + 2; i <= size - 1; i++) {
       st->pushTop(1, i, 0);      
     }
-    if (size > 1)
-      st->pushTop(1, 1, 0);
-    st->pushTop(1, 0, level_two_pos);
+    
   } 
   /* Ostatni procesory cekaji na zpravu */
   else {
@@ -294,8 +309,10 @@ void solve(Graph *graph, int *terminal_set, int terminal_set_size) {
       
       /* Pokud ma rodic akt. uzlu sourozence, bude cyklus jeste
        pokracovat, proto z grafu odstranime rodice akt. uzlu. */
-      if (!st->is_empty())
-        checker->remove_last_vertex();
+      if (!st->is_empty()) {
+        int level_difference = current.level - st->checkTop().level;
+        checker->remove_last(level_difference);
+      }
       continue;
     } 
     
@@ -308,7 +325,7 @@ void solve(Graph *graph, int *terminal_set, int terminal_set_size) {
      pridavame jen vzdy uzly s vetsim cislem nez ma aktualni, abychom
      se vyhnuli duplicitnim stavum. */
     int children_count = 0;
-    for (int i = size - 1; i >= current.value + 1 + current.padding; i--) {
+    for (int i = current.value + 1 + current.padding; i <= size - 1; i++) {
       //if (!checker->contains_vertex(i)) {
         st->pushTop(current.level + 1, i, 0);
         children_count++;
@@ -322,8 +339,10 @@ void solve(Graph *graph, int *terminal_set, int terminal_set_size) {
       /* Pokud tento uzel nema sourozence, tak musime z grafu odebrat
        i jeho rodice. Tim se dostane na vrchol zasobniku pro dalsi
        iteraci cyklu sourozenec rodice (pokud existuje). */
-      if (!st->is_empty() && current.level >= st->checkTop().level)
-        checker->remove_last_vertex();
+      if (!st->is_empty()) {
+        int level_difference = current.level - st->checkTop().level;
+        checker->remove_last(level_difference);
+      }
     }
   }
   cout << "P" << my_rank << ": best = " << checker->get_best_size() << endl;
@@ -351,12 +370,16 @@ void solve(Graph *graph, int *terminal_set, int terminal_set_size) {
     /*
     cout << endl;
     int *pole = new int[8];
-    pole[0] = 1; pole[1] = 4; pole[2] = 9;
-    pole[3] = 15; pole[4] = 21; pole[5] = 0;
-    pole[6] = 13; pole[7] = 23;
+    pole[0] = 12; pole[1] = 6; pole[2] = 4;
+    pole[3] = 7; pole[4] = 0; pole[5] = 2;
+    pole[6] = 3; pole[7] = 8;
     Graph *g = graph->create_induced_subgraph(pole, 8);
+    if (!g->is_connected())
+      cout << "ACHTUNG WARNUNG!";
     g->remove_cycles();
-    print_graph(g, pole, 8);*/
+    print_graph(g, pole, 8);
+    delete(g);
+    * */
   }    
   delete(st);
   delete(checker);

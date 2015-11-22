@@ -32,6 +32,7 @@ class Checker {
     
     bool add_vertex(int n);
     bool remove_last_vertex();
+    bool remove_last(int count);
     bool process_current_state();
     void update_context(int best_size_info, int* context, int context_size);
     

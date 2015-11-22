@@ -86,6 +86,22 @@ bool Checker::remove_last_vertex() {
   return true;
 }
 
+bool Checker::remove_last(int count) {
+  if (count < 0) {
+    cout << "Checker::remove_last: Trying to remove negative number of vertices";
+  }
+  if (current_size - count + 1 == 0) {
+    cout << "Checker::remove_last: Trying to remove more than currently have.";
+    return false;
+  }
+  
+  for (int i = 0; i < count; i++) {
+    current_size--;
+    current_hash[current_vertices[current_size]] = false;
+  }
+  return true;  
+}
+
 bool Checker::process_current_state() {
   //cout << current_size << " / " << global_best_size << endl;
   if (current_size < global_best_size &&
