@@ -18,8 +18,13 @@ class Checker {
     int *best_vertices;
     int best_size;
     
+    int *translation;
+    
     // Tesna dolni mez pro danou ulohu
     int min_price;
+    
+    // Informace o velikosti nejlepsiho reseni globalne
+    int global_best_size;
   
   public:
     Checker(const Graph *parent, int *terminal_nodes, int terminal_set_count);
@@ -28,6 +33,7 @@ class Checker {
     bool add_vertex(int n);
     bool remove_last_vertex();
     bool process_current_state();
+    void update_context(int best_size_info, int* context, int context_size);
     
     // Helper methods
     int get_parent_size() const {
@@ -35,7 +41,8 @@ class Checker {
     }
     
     bool can_adding_help() const {
-      return best_size - current_size > 1;
+      //return true;
+      return global_best_size - current_size > 1;
     }
     
     bool contains_vertex(int n) const {
@@ -56,6 +63,17 @@ class Checker {
     
     int* get_best_vertices() {
       return best_vertices;
+    }
+    
+    int get_global_best_size() const {
+      return global_best_size;
+    }
+    
+    void print_context() const {
+      using namespace std;
+      for (int i = 0; i < current_size; i++)
+        cout << current_vertices[i] << " ";
+      cout << endl;
     }
 };
 

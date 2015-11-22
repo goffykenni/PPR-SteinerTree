@@ -28,6 +28,7 @@ StFrame Stack::checkTop()
     result.level = top->level;
     result.value = top->value;
     result.next = top->next;
+    result.padding = top->padding;
     result.prev = NULL;
     
     return result;
@@ -39,6 +40,7 @@ StFrame Stack::grabTop()
     result.level = top->level;
     result.value = top->value;
     result.next = top->next;
+    result.padding = top->padding;
     result.prev = NULL;
 
     delete(this->top);
@@ -54,11 +56,12 @@ StFrame Stack::grabTop()
     return result;
 }
 
-void Stack::pushTop(int level, int value)
+void Stack::pushTop(int level, int value, int padding)
 {
     StFrame *frame = new StFrame();
     frame->level = level;
     frame->value = value;
+    frame->padding = padding;
     frame->next = this->top;
     frame->prev = NULL;
     
@@ -78,6 +81,7 @@ StFrame Stack::checkBottom() {
     StFrame result;
     result.level = bottom->level;
     result.value = bottom->value;
+    result.padding = bottom->padding;
     result.next = bottom->next;
     result.prev = NULL;
     
@@ -89,6 +93,7 @@ StFrame Stack::grabBottom() {
     StFrame result;
     result.level = bottom->level;
     result.value = bottom->value;
+    result.padding = bottom->padding;
     result.prev = bottom->prev;
     result.next = NULL;
 
@@ -105,10 +110,11 @@ StFrame Stack::grabBottom() {
 }
 
 
-void Stack::pushBottom(int level, int value) {
+void Stack::pushBottom(int level, int value, int padding) {
     StFrame *frame = new StFrame();
     frame->level = level;
     frame->value = value;
+    frame->padding = padding;
     frame->next = NULL;
     frame->prev = this->bottom;
     
@@ -123,7 +129,7 @@ void Stack::pushBottom(int level, int value) {
     size++;
 }
 
-bool Stack::isEmpty() {
+bool Stack::is_empty() {
     return (size == 0);
 }
 
@@ -135,7 +141,8 @@ void Stack::Print() {
     
     StFrame* tmp = this->top;
     while (tmp != NULL) {
-        cout << "(" << tmp->level << ", " << tmp->value << "), ";
+        cout << "(" << tmp->level << ", " << tmp->value << ", "
+          << tmp->padding << "); ";
         tmp = tmp->next;
     }
    cout << endl;

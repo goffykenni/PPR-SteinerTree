@@ -6,6 +6,7 @@
 struct StFrame {
   int level;
   int value;
+  int padding;
   StFrame *next;
   StFrame *prev;
 };
@@ -30,7 +31,7 @@ class Stack {
     StFrame grabTop();
     
     // zaradit na vrsek
-    void pushTop(int level, int value);
+    void pushTop(int level, int value, int padding);
     
     // podivat se na spodek
     StFrame checkBottom();
@@ -39,9 +40,9 @@ class Stack {
     StFrame grabBottom();
     
     // zaradit do spoda
-    void pushBottom(int level, int value);
+    void pushBottom(int level, int value, int padding);
     
-    bool isEmpty();
+    bool is_empty();
     
     int getSize();
     
