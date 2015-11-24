@@ -70,6 +70,19 @@ class Checker {
       return global_best_size;
     }
     
+    void update_global_best_size(int size) {
+      if (size < global_best_size)
+        global_best_size = size;
+    }
+    
+    int get_terminal_set_size() const {
+      return min_price;
+    }
+    
+    int get_context_size() const {
+      return current_size - min_price;
+    }
+    
     void print_context() const {
       using namespace std;
       for (int i = 0; i < current_size; i++)

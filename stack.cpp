@@ -82,8 +82,8 @@ StFrame Stack::checkBottom() {
     result.level = bottom->level;
     result.value = bottom->value;
     result.padding = bottom->padding;
-    result.next = bottom->next;
-    result.prev = NULL;
+    result.next = NULL;
+    result.prev = bottom->prev;
     
     return result;
 }

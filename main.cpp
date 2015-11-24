@@ -1,53 +1,79 @@
 #include <iostream>
 #include <fstream>
+#include <cmath>
+#include <string>
+#include <time.h>
+#include <stdlib.h>
 #include "stack.h"
-#include <utility>
 #include "graph.h"
 #include "checker.h"
-#include <string>
 #include "mpi.h"
-
 
 void print_graph(Graph*, int *label, int label_size);
 void solve(Graph*, int*, int);
 int read_input(Graph*& , int*&, int&, char* input_file);
 void initial_work_distribution(Graph*, int*, int, Checker*&, Stack*&);
 void accept_work(void*, int, Stack*&, Checker*&);
+bool split_and_send(void *, int, int, Stack*&, Checker*&);
 
-// States
-enum State {INIT, WORKING, IDLE, DONE};
+/* Stavy procesu, kterymi prochazi behem vypoctu */
+/* INIT = Inicializace; WORKING = Mam praci a pracuji;
+ * IDLE = Nemam nic na praci; IDLE_EXPECTING = Nemam praci, ale pozadal
+ * jsem si; DONE = Nemam praci a vim, ze vypocet muze skoncit */
+enum State {INIT, WORKING, IDLE, IDLE_EXPECTING, DONE};
 
-// Barvy pro procesy a tokeny
+/* Barvy pro procesy a token v souladu s Dijstrovym algoritmem */
 enum Color {BLACK = 0, WHITE};
 
-// Message tags
+/* Tagy pro zpravy */
 const int MSG_WORK_REQUEST = 1001;
 const int MSG_WORK_SENT = 1002;
 const int MSG_WORK_EMPTY = 1003;
 const int MSG_TOKEN = 1004;
-const int MSG_TERMINATE = 1005;
+const int MSG_TERM = 21005;
+const int MSG_INIT_INFO = 1006;
+const int MSG_ASK_FOR_BEST = 4007;
+const int MSG_RECEIVE_BEST = 11008;
 
-// Vypocetni konstanty
-// Rezna vyska, musi byt aspon 0
-const int cut_height = 2;
-const int msg_check_cycles = 125;
+/* Formaty pro posilani zprav jsou az na jednu vyjimku jednoduche a vzdy
+ * obsahuji pouze 1-2 INTy. Vyjimka je posilani prace. Buffer je pole INTu
+ * a jeho format je:
+ * [0] .. Posilany ramec zasobniku
+ * [1] .. Padding tohoto ramce
+ * [2] .. Delka nejlepsiho reseni znama odesilateli
+ * [3] .. Delka kontextu
+ *  .. zbytek uzly kontextu */
 
-// Global variables
-int my_rank;
-State my_state;
-Color my_color;
-int my_count;
-bool has_token;
+/* Vypocetni konstanty */
+/* Rezna vyska, musi byt aspon 0. Je-li n velikost grafu,
+ * pak zasobnikove ramce s hodnotami (n - 1) - cut_height
+ * se uz nebudou darovat, protoze obsahuji relativne malo prace. */
+const int cut_height = 15;
+/* Pocet cyklu, po kterych se kontroluje fronta zprav */
+const int msg_check_cycles = 205;
+/* Pocet cyklu, po kterych se vymenuje info o delce nejlepsiho reseni */
+const int best_check_cycles = 30000;
 
-int total_proc;
-int total_working_proc;
-MPI_Status status;
+/* Globalni promenne pro procesy */
+static int my_rank;  /* ID prcesu */
+static State my_state; /* Aktualni stav procesu */
+static Color my_color; /* Aktualni barva */
+static bool has_token; /* Info o vlastnictvi tokenu */
+static double start_time, end_time; /* Doba startu a konce vypoctu */
+static int my_count; /* Citac pro posilani zprav - NOT USED ATM */
 
+static int total_proc; /* Pocet procesoru na kterych program bezi */
+static int total_working_proc; /* Pocet skutecne pracujicich */
+static MPI_Status status; /* Status posilanych/prijimanych zprav */
+
+/* Struktura zapouzdrujici info o procesoru a delce jeho nejlepsiho
+ * reseni. Pouziva se na na konci vypoctu pri PBR */
 struct Solution {
   int size;
   int rank;  
 } my_solution;
 
+/* Token pro Dijkstruv algoritmus */
 struct Token {
   Color color;
   int count;
@@ -84,13 +110,18 @@ struct Token {
         .      ~,  */
 
 int main(int argc, char *argv[]) {
-
+using namespace std;
   MPI_Init(&argc, &argv);
   // Zjisti moje id
   MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
   // Zjisti pocet procesoru celkem
   MPI_Comm_size(MPI_COMM_WORLD, &total_proc);
   
+  /* Synchronizace a start mereni casu */
+  MPI_Barrier(MPI_COMM_WORLD);
+  start_time = MPI_Wtime();
+  
+  /* Nacteni vstupu - zacatek */
   Graph *g; int *terminal_set;
   int terminal_set_size;
   if (argc != 2 || read_input(g, terminal_set, terminal_set_size,
@@ -99,18 +130,55 @@ int main(int argc, char *argv[]) {
       std::cout << "Program error, missing name of input file." << std::endl;
     return 1;
   }
+  /* Nacteni vstupu - konec */
   
+  /* DEBUG - randomization */
+   /*if (my_rank == 0) {
+    srand((unsigned) time(NULL));
+  
+    int pole[g->get_vertex_count()];
+    for (int i = 0; i < g->get_vertex_count(); i++) {
+      pole[i] = i;
+    }
+    int temp, x;
+    for (int i = g->get_vertex_count() - 1; i >= 0; i--) {
+      temp = pole[i];
+      x = rand() % (i + 1);
+      pole[i] = pole[x];
+      pole[x] = temp;
+    }
+    
+    for (int i = 0; i < terminal_set_size; i++) {
+      terminal_set[i] = pole[i];
+      cout << "Item: " << pole[i] << endl;
+    }
+  }  
+  MPI_Bcast(terminal_set, terminal_set_size, MPI_INT, 0, MPI_COMM_WORLD);*/
+  /*terminal_set[0] = 19;
+  terminal_set[1] = 4;
+  terminal_set[2] = 3;
+  terminal_set[3] = 23;
+  terminal_set[4] = 29;*/
+  /* DEBUG - konec */
   
 
-  /* Vytvoreni zadani ulohy podle vstupu */  
+  /* Reseni ulohy */ 
   solve(g, terminal_set, terminal_set_size);
   
+  /* Uklidit */
   if (g != NULL)
     delete(g);
   if (terminal_set != NULL)
     delete(terminal_set);  
   
+  /* Synchro a konec mereni */
+  MPI_Barrier(MPI_COMM_WORLD);
+  end_time = MPI_Wtime();
   
+  /* Vypsat mereni. Nevim jak a zejmena kdo, takze P0, dokud se nedozvim
+   * jine info */
+  if (my_rank == 0)
+    cout << "Elapsed time: " << (end_time - start_time) << " seconds." << endl;
   
   MPI_Finalize();
   return 0;
@@ -120,7 +188,10 @@ int min(int a, int b) {
   return a < b ? a : b;
 }
 
-/* Prijme praci z dane zpravy */
+/* Prijme praci z dane zpravy.
+ * message - buffer se zpravou; message_len - delka bufferu;
+ * st - adresa zasobniku volajiciho procesu
+ * checker - adresa checkeru (tj. "kontextu zasobniku") volajiciho procesu */
 void accept_work(void* message, int message_len, Stack*& st, Checker*& checker) {
   using namespace std;
   if (st == NULL || checker == NULL) {
@@ -129,17 +200,17 @@ void accept_work(void* message, int message_len, Stack*& st, Checker*& checker) 
     return;
   }
   if (!st->is_empty()) {
-    cout << "P" << my_rank << ": Error (accept_work): My stack is not empty!";
+    cout << "P" << my_rank << ": Error (accept_work): My stack is not empty! Size: "
+      << st->getSize() << endl;
     return;
   }
   
-  /* Nacti data ze zpravy */
+  /* Nacti data ze zpravy. Podle formatu uvedeneho pred funkci main. */
   int* data = (int*) message;
   int stack_top = data[0];
   int frame_padding = data[1];
   int best_size = data[2];
   int context_len = data[3];
-  
   int context[context_len];
   for (int i = 0; i < context_len; i++) {
     context[i] = data[4 + i];
@@ -149,14 +220,75 @@ void accept_work(void* message, int message_len, Stack*& st, Checker*& checker) 
   checker->update_context(best_size, context, context_len);  
 }
 
+/* Rozdeleni zasobniku a odeslani prace nebo odmitnuti.
+ * buffer - buffer do ktereho se bude zapisovat; buffer_size - jeho velikost;
+ * st - adresa zasobniku procesu (darce); checker - adresa checkeru procesu. */
+bool split_and_send(void* buffer, int buffer_size,
+    Stack*& st, Checker*& checker) {
+  using namespace std;
+  int *message = (int*) buffer;
+  /* Pro ulozeni ramce na dne zasobniku */
+  StFrame frame;
+  /* Hranice pro ramce, ktere uz jsou tak male, ze je proces nedaruje. */
+  int border = checker->get_parent_size() - 
+    checker->get_terminal_set_size() - cut_height;
+  
+  /* Kdyz sam nic nemam nebo mam malo, tak nic nedam. */
+  if (st->is_empty() || (frame = st->checkBottom()).value > border) {
+    return false;
+  }
+  
+  /* Urcim prvniho (a tedy nejvetsiho) potomka ramce na dne zasobniku. */
+  int first_child = frame.value + 1 + frame.padding;
+  /* Hranicni pripad, ramec na dne je presne na hranici rezne vysky. */
+  if (st->getSize() > 1 && frame.value == border && frame.padding > 0 &&
+      frame.level == (frame.prev)->level) {
+    /* Daruji cely ten ramec */
+    message[0] = frame.value;
+    message[1] = frame.padding;
+    message[2] = checker->get_global_best_size(); 
+    message[3] = frame.level - 1;
+    int *vertices = checker->get_current_vertices();
+    
+    for (int i = 0; i < message[3]; i++) {
+      message[4 + i] = vertices[i + checker->get_terminal_set_size()];
+    }
+    /* Sobe ho musim vyhodit. Nebyla by chyba nevyhodit ho, ale pak
+     * se zbytecne overuji casti stavoveho prostoru vicekrat */
+    st->grabBottom();
+    return true; 
+  } 
+  /* Dno je pred reznou vyskou a jeho prvni potomek taky. */
+  else if (first_child < border) {
+    /* Daruj prvorozeneho */
+    message[0] = first_child;
+    message[1] = 0;
+    message[2] = checker->get_global_best_size();
+    message[3] = frame.level;
+    int *vertices = checker->get_current_vertices();
+    for (int i = 0; i < message[3] - 1; i++) {
+      message[4 + i] = vertices[i + checker->get_terminal_set_size()];
+    }
+    message[4 + message[3] - 1] = frame.value;
+    st->grabBottom();
+    frame.padding++;
+    st->pushBottom(frame.level, frame.value, frame.padding);
+    return true;
+  }
+  return false;  
+}
+
 /* Provede inicialni distribuci prace, kdy P0 naposila ostatnim procesum
- * ramce sveho zasobniku z prvni a druhe urovne sveho vlastniho zasobniku */
+ * ramce sveho zasobniku z prvni a druhe urovne sveho vlastniho zasobniku
+ * graph - Vstupni graf; terminal_set - mnozina terminalnich uzlu;
+ * terminal_set_size - jeji velikost; checker - adresa checkeru volajiciho;
+ * st - adresa zasobniku volajiciho. */
 void initial_work_distribution(Graph* graph , int* terminal_set, int terminal_set_size,
     Checker*& checker, Stack*& st) {
   using namespace std;
   
   /* Vytvor pro vsechny vlastni inicialni kontext (checker) a prazdny
-   * zasobnik */  
+   * zasobnik */
   checker = new Checker(graph, terminal_set, terminal_set_size);
   st = new Stack();
   
@@ -168,10 +300,11 @@ void initial_work_distribution(Graph* graph , int* terminal_set, int terminal_se
     /* Zkus, jestli nevyhovuje trivialni reseni. Pokud ano, vsechny
     ostatni preved do stavu DONE, problem uz nemusi resit. */
     if (checker->process_current_state()) {
-      cout << "P0: Everybody stop! Trvial solution works." << endl;
+      cout << "P0 message: Trvial solution works! EVERYBODY STOP NOW!\n" << endl;
       for (int i = 1; i < total_proc; i++) {
-        MPI_Send(&i, 1, MPI_INT, i, MSG_TERMINATE, MPI_COMM_WORLD);
+        MPI_Send(&i, 1, MPI_INT, i, MSG_TERM, MPI_COMM_WORLD);
       }
+      my_state = DONE;
       return;
     }
     // Pocet jiz obslouzenych procesoru (z mnoziny P1, P2, ...)
@@ -179,12 +312,13 @@ void initial_work_distribution(Graph* graph , int* terminal_set, int terminal_se
     // Kolik prace representovane ramci zasobniku muze P0 dat
     int frames_available = size - cut_height - 1;    
     
-    /* Sestavi zpravu, ktera se bude posilat, viz komentar pred funkci
+    /* Sestavi zpravu pro darovani prace,
+     * ktera se bude posilat, viz komentar pred funkci
      * main pro jeji obecny format. */    
     int message_len = 5; int message[message_len];
     /* Posilane ramce nebudou mit padding, reseni lepsi nez cely graf
-     * zatim nezname a pokud ty procesy, ktere dostanou ramec z druhe
-     * urovne zasobniku P0 ho dostanou jako potomka uzlu 0 */
+     * zatim nezname a ty procesy, ktere dostanou ramec z druhe
+     * urovne zasobniku P0, ho dostanou jako potomka uzlu 0 */
     message[1] = 0; message[2] = size; message[4] = 0;
     /* Kolik ramcu se bude posilat */
     int giveaway = min(total_proc - 1, frames_available);
@@ -218,9 +352,9 @@ void initial_work_distribution(Graph* graph , int* terminal_set, int terminal_se
     total_working_proc = served + 1;
     cout << "Total working processors: " << total_working_proc << endl;
     
-    // Ukonci ty procesory, na ktere se prace nedostala
+    /* Ukonci ty procesory, na ktere se prace nedostala */
     for (int i = served + 1; i < total_proc; i++) {
-      MPI_Send(&message, message_len, MPI_INT, i, MSG_TERMINATE, MPI_COMM_WORLD);
+      MPI_Send(&message, message_len, MPI_INT, i, MSG_TERM, MPI_COMM_WORLD);
     }
     
     /* P0 rozvine svuj vlastni zasobnik podle toho, kolik toho daroval. */
@@ -241,7 +375,7 @@ void initial_work_distribution(Graph* graph , int* terminal_set, int terminal_se
         accept_work(&message, message_len, st, checker);
         my_state = WORKING;
         break;
-      case MSG_TERMINATE:
+      case MSG_TERM:
       default:
         my_state = DONE;
         break;
@@ -252,49 +386,229 @@ void initial_work_distribution(Graph* graph , int* terminal_set, int terminal_se
 /* Nalezne nejmensi podgraf (z hlediska poctu vrcholu) daneho grafu
  * obsahujici uzly z cilove mnoziny, ktery je souvisly. Idea spociva
  * v tom systematicky overovat vsechny mozne kombinace vrcholu, ktere
- * lze do grafu pridavat. */
+ * lze do grafu pridavat. 
+ * graph - vstupni graf; terminal_set - mnozina terminalnich uzlu; */
 void solve(Graph *graph, int *terminal_set, int terminal_set_size) {
   using namespace std;
-  my_state = INIT;
-  Checker *checker;
-  Stack *st;
+  
+  /* Inicializace procesu. Nastaveni vychozich hodnot jejich promennych. */
   int size = graph->get_vertex_count() - terminal_set_size;
-  //int parent_size = checker->get_parent_size();
+  my_state = INIT;
+  
+  /* Citac pro kontrolu fronty zprav */
+  int n = 0;
+  my_color = WHITE;
+  my_count = 0;
+  token.color = WHITE;
+  token.count = 0;
+  /* P0 ma na zacatku token */
+  has_token = my_rank == 0 ? true : false;
+  
+  /* Zatim nevime, kolik bude pracovat, tak predpokladejme, ze vsichni. */
+  total_working_proc = total_proc;  
+  
+  /* Buffery pro posilani zprav. */
+  int donor_buff[2], request_buff, terminate_buff, refuse_buff, best_buff;
+  int work_buff_len = size + 4;
+  int work_buff[work_buff_len];
+  /* Promenna pro neblokujici sendy */
+  MPI_Request request;
+  /* Promenna, ktera bude indikovat, jestli jsou ve fronte zpravy. */
+  int flag = 0;
   
   /* Pocatecni rozdeleni prace mezi procesory */
+  Checker *checker;
+  Stack *st;
   initial_work_distribution(graph, terminal_set, terminal_set_size, checker, st); 
-  cout << "P" << my_rank << " stack: ";
-  st->Print();
-  cout << "P" << my_rank << " context: ";
-  checker->print_context();
+  /* P0 broadcastne informaci o celkovem poctu pracujicich procesoru .*/
+  MPI_Bcast(&total_working_proc, 1, MPI_INT, 0, MPI_COMM_WORLD);
   
-  /*if (my_rank != 0)
-    return;  */
-  /*
-  checker = new Checker(graph, terminal_set, terminal_set_size);
-  st = new Stack();
+  /* Id distributora - tj. procesu, ktery bude periodicky sbirat a
+   * poskytovat informace o delkach nejlepsich reseni. */
+  int distributor_id = total_working_proc - 1;
+  /* Taktika pro vyber darcu prace bude taktika lokalnich cyklickych
+   * zadosti. Kadzy procesor bude mit svuj counter. */
+  srand(time(NULL) * sin((double) my_rank / total_working_proc) + 11);
+  int counter = rand() % total_working_proc;
+
+  /* Kolikrat po sobe byl procesor odmitnut pri zadani o praci. */
+  int denials = 0;
+  /* Zazadal si procesor distributora o vymenu delky nejlepsiho reseni? */
+  bool asked_for_best = false;
   
-  // Zkusime, jestli nahodou sama cilova mnozina nevyhovuje uloze.
-  if (checker->process_current_state())
-    return;
-  // Na zasobnik umistime vychozi stavy
-  for (int i = size - 1; i >= 0; i--) {
-    // Uzly, co jsou v cilove mnozine, tam nedame
-    //if (!checker->contains_vertex(i))
-      st->pushTop(1, i, 0);
+  while (my_state != DONE) {          
+    n++;
+    /* Je cas na kontrolu fronty zprav? */    
+    if ((n % msg_check_cycles) == 0) {
+      MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+      if (flag) {
+        int sender = status.MPI_SOURCE;
+        switch (status.MPI_TAG) {    
+                      
+          /* Prisla mi prace. */
+          case MSG_WORK_SENT: {          
+            MPI_Recv(&work_buff, work_buff_len, MPI_INT, sender, MSG_WORK_SENT,
+              MPI_COMM_WORLD, &status);
+            accept_work(&work_buff, work_buff_len, st, checker);
+            my_state = WORKING;
+            denials = 0;
+            break;
+          }
+          
+          /* Prisla zprava, ze ten, koho jsem zadal o praci, pro me zadnou nema. */
+          case MSG_WORK_EMPTY: {
+            MPI_Recv(&refuse_buff, 1, MPI_INT, sender, MSG_WORK_EMPTY,
+              MPI_COMM_WORLD, &status);
+            checker->update_global_best_size(refuse_buff);
+            my_state = IDLE;
+            denials++;
+            break;
+          }
+          
+          /* Nekdo me zada o praci */
+          case MSG_WORK_REQUEST: {
+            MPI_Recv(&request_buff, 1, MPI_INT, sender, MSG_WORK_REQUEST,
+              MPI_COMM_WORLD, &status);
+            /* V zadosti je ulozena delka nejlepsiho reseni zadatele. */
+            checker->update_global_best_size(request_buff);
+            /* Pokusim se najit praci */
+            bool sent = split_and_send(&work_buff, work_buff_len, st, checker);
+            if (sent) {
+              MPI_Send(&work_buff, work_buff_len, MPI_INT, sender, MSG_WORK_SENT,
+                MPI_COMM_WORLD);
+            } else {
+              refuse_buff = checker->get_global_best_size();
+              MPI_Send(&refuse_buff, 1, MPI_INT, sender, MSG_WORK_EMPTY,
+                MPI_COMM_WORLD);              
+            }
+            /* Pokud jsem poslal praci procesoru s mensim ID, musim
+             * se ocernit podle Dijkstra. */
+            if (sent && sender < my_rank) {
+              my_color = BLACK;
+            }
+            break;
+          }
+          
+          /* Prisel token. */
+          case MSG_TOKEN: {
+            MPI_Recv(&token, 1, MPI_2INT, sender, MSG_TOKEN,
+              MPI_COMM_WORLD, &status);
+            has_token = true;
+            
+            if (my_rank == 0) {
+              /* P0 dostal zpatky bily token. Konec */
+              if (token.color == WHITE) {
+                for (int i = 1; i < total_working_proc; i++) {
+                  MPI_Send(&terminate_buff, 1, MPI_INT, i, MSG_TERM,
+                    MPI_COMM_WORLD);
+                }
+                my_state = DONE;
+              } else {
+                token.color = WHITE;
+              }
+            } 
+            /* Pokud jsem cerny, musim ocernit i token podle Dijkstra. */
+            else if (my_color == BLACK) {
+              token.color = BLACK;
+              cout << "Token colored to BLACK" << endl;
+            }            
+            cout << "P" << my_rank << " : Got token, color " << token.color << endl;
+            break;
+          }
+            
+          /* Prisla zprava indikujici ukonceni vypoctu. */
+          case MSG_TERM: {
+            MPI_Recv(&terminate_buff, 1, MPI_INT, 0, MSG_TERM,
+              MPI_COMM_WORLD, &status);
+            my_state = DONE;            
+            continue;   
+          }
+          
+          /* Nekdo me zada o me znamou delku nejlepsiho reseni */
+          case MSG_ASK_FOR_BEST: {
+            MPI_Recv(&best_buff, 1, MPI_INT, sender, MSG_ASK_FOR_BEST,
+              MPI_COMM_WORLD, &status);
+            /* Zaroven mi posila svoji delku nejlepsiho znameho reseni. */  
+            checker->update_global_best_size(best_buff);
+            best_buff = checker->get_global_best_size();
+            MPI_Isend(&best_buff, 1, MPI_INT, sender, MSG_RECEIVE_BEST,
+              MPI_COMM_WORLD, &request);
+            break;
+          }   
+          
+          /* Nekdo mi posila jemu znamou delku nejlepsiho reseni */
+          case MSG_RECEIVE_BEST: {
+            MPI_Recv(&best_buff, 1, MPI_INT, sender, MSG_RECEIVE_BEST,
+              MPI_COMM_WORLD, &status);
+            checker->update_global_best_size(best_buff);
+            /* Priste se muzu zase zeptat */
+            asked_for_best = false;
+            break;
+          }
+          
+          default:
+            cout << "ERROR: UNKNOWN MESSAGE";
+            
+        }        
+      }
+      /* Pokud jsem IDLE, musim preposlat token, pokud ho mam, a (nebo)
+       * si zazadat o praci. */
+      if (my_state == IDLE) {
+        /* Pokud resi jen jediny procesor, znamena to konec vypoctu. */
+        if (total_working_proc == 1) {
+          my_state = DONE;
+          continue;
+        }
+        /* Pokud mam token, poslu ho */
+        my_color = WHITE;      
+        if (has_token) {          
+          MPI_Isend(&token, 1, MPI_2INT, (my_rank + 1) % total_working_proc,
+              MSG_TOKEN, MPI_COMM_WORLD, &request);
+          has_token = false;
+        }
+        
+        /* Zazadam o praci podle hodnoty sveho citace. */
+        /* Pokud jsem uz zadal hodnekrat, tak usoudim, ze asi prace neni
+         * a uz nebudu otravovat. */
+        if (denials < 15 * total_working_proc - 1) {
+          /* Nesmim poslat zpravu sam sobe hlavne! */       
+          if (my_rank == counter)
+            counter = (counter + 1) % total_working_proc;
+          request_buff = checker->get_global_best_size();
+          MPI_Send(&request_buff, 1, MPI_INT, counter, MSG_WORK_REQUEST,
+            MPI_COMM_WORLD);       
+          counter = (counter + 1) % total_working_proc;
+          /* Ocekavam praci nebo zamitnuti */
+          my_state = IDLE_EXPECTING;
+        }
+      }     
     }
-  st->Print();
-  */
- 
- 
-  while (!st->is_empty()) {
-    if (st->is_empty()) {
-      my_state = DONE;
+    
+    /* Pokud je cas, pozadam si distributora o delku nejlepsiho znameho reseni,
+     * pokud jsem se teda uz neptal a moje zadost jeste nebyla
+     * uspokojena. */
+    if ((n % best_check_cycles) == 0 && !asked_for_best
+        && my_rank != distributor_id) {
+      asked_for_best = true;
+      best_buff = checker->get_global_best_size();
+      MPI_Send(&best_buff, 1, MPI_INT, distributor_id, MSG_ASK_FOR_BEST,
+        MPI_COMM_WORLD);
+    }
+    
+    /* Dal smi pouze pracujici procesy. */
+    if (my_state != WORKING)
       continue;
-    }       
+    
+    /* Kdyz nemam praci, musim zmenit stav */
+    if (st->is_empty()) {
+      my_state = IDLE;
+      continue;
+    }
+    
     // Vyjmi uzel ze zasobniku a zacni ho zpracovavat.
     StFrame current = st->grabTop();
-    
+    if (current.value < 0 || current.value >= size)
+      cout << "Neplatna hodnota zasob (" << current.value  << "): (main cycle)\n";
     /* Pokud pridani tohoto uzlu nevede ke zlepseni vysledku, do grafu
      ho nepridame, ze zasobniku odstranime vsechny jeho sourozence
      a jeho rodice odebereme z grafu. */
@@ -356,35 +670,23 @@ void solve(Graph *graph, int *terminal_set, int terminal_set_size) {
   Solution out;
   MPI_Barrier(MPI_COMM_WORLD);
   MPI_Reduce(&my_solution, &out, 1, MPI_2INT, MPI_MINLOC, 0, MPI_COMM_WORLD); 
-  MPI_Bcast(&out, 1, MPI_DOUBLE_INT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(&out, 1, MPI_2INT, 0, MPI_COMM_WORLD);
   /* Ten, kdo ma nejlepsi reseni, pripravi ho a vytiskne. Ostatni muzou
    * koncit. */  
   if (my_solution.rank == out.rank) {
     // Priprav a tiskni reseni
-    cout << "P" << out.rank << " has best solution" << endl;
+    cout << "P" << out.rank << " has best solution (" << my_solution.size <<")" << endl;
     Graph *r = graph->create_induced_subgraph(checker->get_best_vertices(),
     checker->get_best_size());
     r->remove_cycles();
     print_graph(r, checker->get_best_vertices(), checker->get_best_size());
     delete(r);
-    /*
-    cout << endl;
-    int *pole = new int[8];
-    pole[0] = 12; pole[1] = 6; pole[2] = 4;
-    pole[3] = 7; pole[4] = 0; pole[5] = 2;
-    pole[6] = 3; pole[7] = 8;
-    Graph *g = graph->create_induced_subgraph(pole, 8);
-    if (!g->is_connected())
-      cout << "ACHTUNG WARNUNG!";
-    g->remove_cycles();
-    print_graph(g, pole, 8);
-    delete(g);
-    * */
   }    
   delete(st);
   delete(checker);
 }
 
+/* Metoda pro nacteni vstupu */
 int read_input(Graph*& g, int*& terminal_set, int& terminal_set_size,
   char *input_file) {
   bool** matice;

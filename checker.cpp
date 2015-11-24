@@ -59,11 +59,11 @@ void Checker::update_context(int best_size_info, int* context, int context_size)
 
 bool Checker::add_vertex(int n) {
   if (n < 0 || parent_size <= n - min_price) {
-    cout << "Checker::add_vertex: Index outside of range";
+    cout << "Checker::add_vertex: Index (" << n <<") outside of range\n";
     return false;
   }
   if (current_size == parent_size) {
-    cout << "Checker::add_vertex: Capacity is full.";
+    cout << "Checker::add_vertex: Capacity is full.\n";
     return false;
   }
   
@@ -103,7 +103,6 @@ bool Checker::remove_last(int count) {
 }
 
 bool Checker::process_current_state() {
-  //cout << current_size << " / " << global_best_size << endl;
   if (current_size < global_best_size &&
       parent->is_sub_connected(current_vertices, current_size)) {
     // Update best
