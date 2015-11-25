@@ -133,7 +133,7 @@ using namespace std;
   /* Nacteni vstupu - konec */
   
   /* DEBUG - randomization */
-   /*if (my_rank == 0) {
+  /* if (my_rank == 0) {
     srand((unsigned) time(NULL));
   
     int pole[g->get_vertex_count()];
@@ -240,26 +240,8 @@ bool split_and_send(void* buffer, int buffer_size,
   
   /* Urcim prvniho (a tedy nejvetsiho) potomka ramce na dne zasobniku. */
   int first_child = frame.value + 1 + frame.padding;
-  /* Hranicni pripad, ramec na dne je presne na hranici rezne vysky. */
-  if (st->getSize() > 1 && frame.value == border && frame.padding > 0 &&
-      frame.level == (frame.prev)->level) {
-    /* Daruji cely ten ramec */
-    message[0] = frame.value;
-    message[1] = frame.padding;
-    message[2] = checker->get_global_best_size(); 
-    message[3] = frame.level - 1;
-    int *vertices = checker->get_current_vertices();
-    
-    for (int i = 0; i < message[3]; i++) {
-      message[4 + i] = vertices[i + checker->get_terminal_set_size()];
-    }
-    /* Sobe ho musim vyhodit. Nebyla by chyba nevyhodit ho, ale pak
-     * se zbytecne overuji casti stavoveho prostoru vicekrat */
-    st->grabBottom();
-    return true; 
-  } 
   /* Dno je pred reznou vyskou a jeho prvni potomek taky. */
-  else if (first_child < border) {
+  if (first_child < border) {
     /* Daruj prvorozeneho */
     message[0] = first_child;
     message[1] = 0;
@@ -274,6 +256,24 @@ bool split_and_send(void* buffer, int buffer_size,
     frame.padding++;
     st->pushBottom(frame.level, frame.value, frame.padding);
     return true;
+  } /* Potomek dna uz je na rezne vysce, ale zaroven ma proces bez
+    tohoto dna dostatek prace. */ 
+  else if (st->getSize() > 1 && (frame.prev)->level < border) {
+    /* Daruj cele dno */
+    message[0] = frame.value;
+    message[1] = frame.padding;
+    message[2] = checker->get_global_best_size();
+    message[3] = frame.level - 1;
+    int *vertices = checker->get_current_vertices();
+    
+    for (int i = 0; i < message[3]; i++) {
+      message[4 + i] = vertices[i + checker->get_terminal_set_size()];
+    }
+    /* Sobe ho musim vyhodit. Nebyla by chyba nevyhodit ho, ale pak
+     * se zbytecne overuji casti stavoveho prostoru vicekrat */
+    st->grabBottom();
+    return true; 
+    
   }
   return false;  
 }
@@ -503,7 +503,7 @@ void solve(Graph *graph, int *terminal_set, int terminal_set_size) {
                     MPI_COMM_WORLD);
                 }
                 my_state = DONE;
-              } else {
+              }  else {
                 token.color = WHITE;
               }
             } 
