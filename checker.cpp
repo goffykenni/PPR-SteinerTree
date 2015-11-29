@@ -50,14 +50,20 @@ void Checker::update_context(int best_size_info, int* context, int context_size)
     global_best_size = best_size_info;
   
   // Nejprve je nutno odstranit aktualni kontext.
-  for (int i = 0; i < current_size - min_price; i++)
+  int cur_context_size = current_size - min_price;
+  for (int i = 0; i < cur_context_size; i++)
     remove_last_vertex();
   // Nasledne narhaj novy kontext.
   for (int i = 0; i < context_size; i++)
-    add_vertex(context[i]);
+    add_vertex(context[i], false);
+    
+   /*cout << "Received context: ";
+  for (int i = 0; i < current_size ; i++)
+    cout << current_vertices[i] << ", ";
+  cout << endl;*/
 }
 
-bool Checker::add_vertex(int n) {
+bool Checker::add_vertex(int n, bool translate) {
   if (n < 0 || parent_size <= n - min_price) {
     cout << "Checker::add_vertex: Index (" << n <<") outside of range\n";
     return false;
@@ -67,7 +73,7 @@ bool Checker::add_vertex(int n) {
     return false;
   }
   
-  int translated = translation[n];
+  int translated = translate ? translation[n] : n;
   //cout << n << " : " << translated << endl;
   current_vertices[current_size++] = translated;
   current_hash[translated] = true;

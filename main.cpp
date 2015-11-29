@@ -48,7 +48,7 @@ const int MSG_RECEIVE_BEST = 11008;
 /* Rezna vyska, musi byt aspon 0. Je-li n velikost grafu,
  * pak zasobnikove ramce s hodnotami (n - 1) - cut_height
  * se uz nebudou darovat, protoze obsahuji relativne malo prace. */
-const int cut_height = 15;
+const int cut_height = 5;
 /* Pocet cyklu, po kterych se kontroluje fronta zprav */
 const int msg_check_cycles = 205;
 /* Pocet cyklu, po kterych se vymenuje info o delce nejlepsiho reseni */
@@ -217,6 +217,10 @@ void accept_work(void* message, int message_len, Stack*& st, Checker*& checker) 
   }
   /* Dej ramec na zasobnik a aktualizuj kontext. */
   st->pushTop(context_len + 1, stack_top, frame_padding);
+  /*cout << "Accepting context: ";
+  for (int i = 0; i < context_len; i++)
+    cout << context[i] << ", ";
+  cout << endl;*/
   checker->update_context(best_size, context, context_len);  
 }
 
@@ -251,7 +255,7 @@ bool split_and_send(void* buffer, int buffer_size,
     for (int i = 0; i < message[3] - 1; i++) {
       message[4 + i] = vertices[i + checker->get_terminal_set_size()];
     }
-    message[4 + message[3] - 1] = frame.value;
+    message[4 + message[3] - 1] = checker->translate(frame.value);
     st->grabBottom();
     frame.padding++;
     st->pushBottom(frame.level, frame.value, frame.padding);
@@ -300,7 +304,7 @@ void initial_work_distribution(Graph* graph , int* terminal_set, int terminal_se
     /* Zkus, jestli nevyhovuje trivialni reseni. Pokud ano, vsechny
     ostatni preved do stavu DONE, problem uz nemusi resit. */
     if (checker->process_current_state()) {
-      cout << "P0 message: Trvial solution works! EVERYBODY STOP NOW!\n" << endl;
+      cout << "P0 message: Trivial solution works! EVERYBODY STOP NOW!\n" << endl;
       for (int i = 1; i < total_proc; i++) {
         MPI_Send(&i, 1, MPI_INT, i, MSG_TERM, MPI_COMM_WORLD);
       }
@@ -319,7 +323,8 @@ void initial_work_distribution(Graph* graph , int* terminal_set, int terminal_se
     /* Posilane ramce nebudou mit padding, reseni lepsi nez cely graf
      * zatim nezname a ty procesy, ktere dostanou ramec z druhe
      * urovne zasobniku P0, ho dostanou jako potomka uzlu 0 */
-    message[1] = 0; message[2] = size; message[4] = 0;
+    message[1] = 0; message[2] = graph->get_vertex_count();
+    message[4] = checker->translate(0);
     /* Kolik ramcu se bude posilat */
     int giveaway = min(total_proc - 1, frames_available);
     cout << "P0 will give away " << giveaway << " frames." << endl;
@@ -435,7 +440,7 @@ void solve(Graph *graph, int *terminal_set, int terminal_set_size) {
   int denials = 0;
   /* Zazadal si procesor distributora o vymenu delky nejlepsiho reseni? */
   bool asked_for_best = false;
-  
+
   while (my_state != DONE) {          
     n++;
     /* Je cas na kontrolu fronty zprav? */    
@@ -607,6 +612,7 @@ void solve(Graph *graph, int *terminal_set, int terminal_set_size) {
     
     // Vyjmi uzel ze zasobniku a zacni ho zpracovavat.
     StFrame current = st->grabTop();
+  
     if (current.value < 0 || current.value >= size)
       cout << "Neplatna hodnota zasob (" << current.value  << "): (main cycle)\n";
     /* Pokud pridani tohoto uzlu nevede ke zlepseni vysledku, do grafu
@@ -631,7 +637,7 @@ void solve(Graph *graph, int *terminal_set, int terminal_set_size) {
     } 
     
     // Pridani uzlu muze vest ke zlepseni, tak to vyzkousejme
-    checker->add_vertex(current.value);
+    checker->add_vertex(current.value, true);
     checker->process_current_state();
 
     /* Potomky akt. uzlu pridame na zasobnik. Nepridavame pritom ty uzly,
@@ -659,6 +665,7 @@ void solve(Graph *graph, int *terminal_set, int terminal_set_size) {
       }
     }
   }
+
   cout << "P" << my_rank << ": best = " << checker->get_best_size() << endl;
   
   /* Provedeni paralelni binarni redukce za ucelem zjisteni nejlepsiho reseni.

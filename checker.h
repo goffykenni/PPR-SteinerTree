@@ -30,7 +30,7 @@ class Checker {
     Checker(const Graph *parent, int *terminal_nodes, int terminal_set_count);
     ~Checker();
     
-    bool add_vertex(int n);
+    bool add_vertex(int n, bool translate);
     bool remove_last_vertex();
     bool remove_last(int count);
     bool process_current_state();
@@ -81,6 +81,10 @@ class Checker {
     
     int get_context_size() const {
       return current_size - min_price;
+    }
+    
+    int translate(int n) const {
+      return translation[n];
     }
     
     void print_context() const {
