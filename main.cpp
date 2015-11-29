@@ -22,7 +22,7 @@ bool split_and_send(void *, int, int, Stack*&, Checker*&);
  * jsem si; DONE = Nemam praci a vim, ze vypocet muze skoncit */
 enum State {INIT, WORKING, IDLE, IDLE_EXPECTING, DONE};
 
-/* Barvy pro procesy a token v souladu s Dijstrovym algoritmem */
+/* Barvy pro procesy a token v souladu s Dijkstrovym algoritmem */
 enum Color {BLACK = 0, WHITE};
 
 /* Tagy pro zpravy */
@@ -48,7 +48,7 @@ const int MSG_RECEIVE_BEST = 11008;
 /* Rezna vyska, musi byt aspon 0. Je-li n velikost grafu,
  * pak zasobnikove ramce s hodnotami (n - 1) - cut_height
  * se uz nebudou darovat, protoze obsahuji relativne malo prace. */
-const int cut_height = 5;
+const int cut_height = 15;
 /* Pocet cyklu, po kterych se kontroluje fronta zprav */
 const int msg_check_cycles = 205;
 /* Pocet cyklu, po kterych se vymenuje info o delce nejlepsiho reseni */
@@ -354,7 +354,7 @@ void initial_work_distribution(Graph* graph , int* terminal_set, int terminal_se
     }    
     
     /* Uloz pocet procesoru, kteri budou mit praci (vcetne tohoto, tj. P0) */
-    total_working_proc = served + 1;
+    total_working_proc = total_proc; //served + 1;
     cout << "Total working processors: " << total_working_proc << endl;
     
     /* Ukonci ty procesory, na ktere se prace nedostala */
@@ -380,9 +380,9 @@ void initial_work_distribution(Graph* graph , int* terminal_set, int terminal_se
         accept_work(&message, message_len, st, checker);
         my_state = WORKING;
         break;
-      case MSG_TERM:
+      case MSG_TERM:  
       default:
-        my_state = DONE;
+        my_state = WORKING;
         break;
     }
   }
