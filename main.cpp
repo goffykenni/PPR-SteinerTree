@@ -20,7 +20,7 @@ bool split_and_send(void *, int, int, Stack*&, Checker*&);
 /* INIT = Inicializace; WORKING = Mam praci a pracuji;
  * IDLE = Nemam nic na praci; IDLE_EXPECTING = Nemam praci, ale pozadal
  * jsem si; DONE = Nemam praci a vim, ze vypocet muze skoncit */
-enum State {INIT, WORKING, IDLE, IDLE_EXPECTING, DONE};
+enum State {INIT, WORKING, IDLE, IDLE_EXPECTING, DONE, EXIT};
 
 /* Barvy pro procesy a token v souladu s Dijkstrovym algoritmem */
 enum Color {BLACK = 0, WHITE};
@@ -133,7 +133,7 @@ using namespace std;
   /* Nacteni vstupu - konec */
   
   /* DEBUG - randomization */
-  /* if (my_rank == 0) {
+   /*if (my_rank == 0) {
     srand((unsigned) time(NULL));
   
     int pole[g->get_vertex_count()];
@@ -517,7 +517,7 @@ void solve(Graph *graph, int *terminal_set, int terminal_set_size) {
               token.color = BLACK;
               cout << "Token colored to BLACK" << endl;
             }            
-            cout << "P" << my_rank << " : Got token, color " << token.color << endl;
+            //cout << "P" << my_rank << " : Got token, color " << token.color << endl;
             break;
           }
             
@@ -547,6 +547,7 @@ void solve(Graph *graph, int *terminal_set, int terminal_set_size) {
               MPI_COMM_WORLD, &status);
             checker->update_global_best_size(best_buff);
             /* Priste se muzu zase zeptat */
+            
             asked_for_best = false;
             break;
           }
@@ -555,7 +556,8 @@ void solve(Graph *graph, int *terminal_set, int terminal_set_size) {
             cout << "ERROR: UNKNOWN MESSAGE";
             
         }        
-      }
+      } 
+      
       /* Pokud jsem IDLE, musim preposlat token, pokud ho mam, a (nebo)
        * si zazadat o praci. */
       if (my_state == IDLE) {
@@ -576,7 +578,7 @@ void solve(Graph *graph, int *terminal_set, int terminal_set_size) {
         /* Pokud jsem uz zadal hodnekrat, tak usoudim, ze asi prace neni
          * a uz nebudu otravovat. */
         if (denials < 15 * total_working_proc - 1) {
-          /* Nesmim poslat zpravu sam sobe hlavne! */       
+          /* Nesmim poslat zpravu sam sobe hlavne! */   
           if (my_rank == counter)
             counter = (counter + 1) % total_working_proc;
           request_buff = checker->get_global_best_size();
@@ -586,14 +588,14 @@ void solve(Graph *graph, int *terminal_set, int terminal_set_size) {
           /* Ocekavam praci nebo zamitnuti */
           my_state = IDLE_EXPECTING;
         }
-      }     
+      } 
     }
     
     /* Pokud je cas, pozadam si distributora o delku nejlepsiho znameho reseni,
      * pokud jsem se teda uz neptal a moje zadost jeste nebyla
      * uspokojena. */
     if ((n % best_check_cycles) == 0 && !asked_for_best
-        && my_rank != distributor_id) {
+        && my_rank != distributor_id && my_state != DONE) {
       asked_for_best = true;
       best_buff = checker->get_global_best_size();
       MPI_Send(&best_buff, 1, MPI_INT, distributor_id, MSG_ASK_FOR_BEST,
