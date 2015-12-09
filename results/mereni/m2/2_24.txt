@@ -1,0 +1,43 @@
+P0 will give away 15 frames.
+Total working processors: 24
+P1: best = 40
+P6: best = 40
+P7: best = 13
+P2: best = 40
+P3: best = 40
+P4: best = 40
+P5: best = 40
+P8: best = 40
+P9: best = 40
+P10: best = 40
+P12: best = 40
+P13: best = 40
+P14: best = 40
+P15: best = 40
+P16: best = 15
+P17: best = 40
+P0: best = 40
+P20: best = 40
+P22: best = 40
+P18: best = 40
+P21: best = 40
+P23: best = 40
+P19: best = 40
+P11: best = 40
+P7 has best solution (13)
+33 37 12 29 9 20 5 6 8 0 4 31 39 
+-------------------------
+0 0 0 0 0 0 0 0 0 1 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 1 1 
+0 0 0 0 0 0 0 0 0 0 1 0 0 
+0 0 0 0 0 0 0 0 1 0 0 0 1 
+0 0 0 0 0 0 1 1 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 1 0 
+0 0 0 0 1 0 0 0 1 1 1 0 0 
+0 0 0 0 1 0 0 0 0 0 0 0 0 
+0 0 0 1 0 0 1 0 0 0 0 0 0 
+1 0 0 0 0 0 1 0 0 0 0 0 0 
+0 0 1 0 0 0 1 0 0 0 0 0 0 
+0 1 0 0 0 1 0 0 0 0 0 0 0 
+0 1 0 1 0 0 0 0 0 0 0 0 0 
+Elapsed time: 0.276783 seconds.

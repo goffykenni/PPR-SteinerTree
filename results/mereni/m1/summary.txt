@@ -1,0 +1,7 @@
+#proc : time
+1	243.716 seconds.
+2	124.379 seconds.
+4	62.6716 seconds.
+8	31.1697 seconds.
+16	19.8442 seconds.
+24	17.519 seconds.
