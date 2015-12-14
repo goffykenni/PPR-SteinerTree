@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2015.8.3)  14 DEC 2015 01:54
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2015.8.3)  14 DEC 2015 17:20
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -564,65 +564,65 @@ Underfull \hbox (badness 10000) in paragraph at lines 75--76
 
  []
 
-[4] [5] <obr/stavy.png, id=31, 761.84625pt x 269.005pt>
+[4] [5] <obr/stavy.png, id=32, 761.84625pt x 269.005pt>
 File: obr/stavy.png Graphic file (type png)
  <use obr/stavy.png>
 Package pdftex.def Info: obr/stavy.png used on input line 144.
 (pdftex.def)             Requested size: 312.00119pt x 110.16551pt.
 
-[6 <./obr/stavy.png>] <obr/worst.png, id=37, 352.31625pt x 286.06876pt>
+[6 <./obr/stavy.png>] <obr/worst.png, id=38, 352.31625pt x 286.06876pt>
 File: obr/worst.png Graphic file (type png)
 
 <use obr/worst.png>
 Package pdftex.def Info: obr/worst.png used on input line 163.
 (pdftex.def)             Requested size: 155.99762pt x 126.66507pt.
  [7 <./obr/worst.png>]
-Underfull \hbox (badness 10000) in paragraph at lines 193--197
+Underfull \hbox (badness 10000) in paragraph at lines 194--198
 
  []
 
 [8]
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 222.
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 223.
 
  (/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <12> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 222.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 223.
 
-Underfull \hbox (badness 10000) in paragraph at lines 229--231
+Underfull \hbox (badness 10000) in paragraph at lines 230--232
 
  []
 
 
-Overfull \hbox (3.19905pt too wide) in paragraph at lines 234--234
+Overfull \hbox (3.19905pt too wide) in paragraph at lines 235--235
 []\IL2/cmr/m/n/12 MSG[]WORK[]REQUEST| 
  []
 
 
-Underfull \hbox (badness 1005) in paragraph at lines 244--245
+Underfull \hbox (badness 1005) in paragraph at lines 245--246
 []\IL2/cmr/m/n/12 Informace pøí-jemci o tom, ¾e vý-poèet
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 233--254
+Underfull \hbox (badness 10000) in paragraph at lines 234--255
 
  []
 
 [9]
-Overfull \hbox (4.29591pt too wide) in paragraph at lines 260--264
+Overfull \hbox (4.29591pt too wide) in paragraph at lines 263--267
 \IL2/cmr/m/n/12 MPI), je-jím¾ vý-sled-kem bude ve-li-kost mi-ni-mál-ního Stei-n
 e-rova stromu a nejme-
  []
 
 
-Overfull \hbox (0.81136pt too wide) in paragraph at lines 267--270
+Overfull \hbox (0.81136pt too wide) in paragraph at lines 270--273
  \IL2/cmr/bx/n/12 For-mát po-sí-la-ných zpráv[] \IL2/cmr/m/n/12 Po-sí-lání a pø
 í-jem zpráv spolu s kon-t-ro-lou fronty
  []
 
 
-Overfull \hbox (0.83493pt too wide) in paragraph at lines 267--270
+Overfull \hbox (0.83493pt too wide) in paragraph at lines 270--273
 \IL2/cmr/m/n/12 èe-ka-jí-cích zpráv pro-vá-díme po-mocí od-po-ví-da-jí-cích fun
 kcí knihovny MPI pøed-
  []
@@ -631,16 +631,16 @@ kcí knihovny MPI pøed-
 File: obr/deleni.png Graphic file (type png)
 
 <use obr/deleni.png>
-Package pdftex.def Info: obr/deleni.png used on input line 366.
+Package pdftex.def Info: obr/deleni.png used on input line 369.
 (pdftex.def)             Requested size: 390.0pt x 163.20055pt.
  [13] [14 <./obr/deleni.png>] [15] [16] [17] [18] [19]
-LaTeX Font Info:    Try loading font information for IL2+cmtt on input line 581
+LaTeX Font Info:    Try loading font information for IL2+cmtt on input line 584
 .
 
 (/usr/share/texlive/texmf-dist/tex/cslatex/base/il2cmtt.fd
 File: il2cmtt.fd 1997/08/20 CSLaTeX font definitions
 )
-Underfull \hbox (badness 1231) in paragraph at lines 581--582
+Underfull \hbox (badness 1231) in paragraph at lines 584--585
 []\IL2/cmr/m/n/12 SANTUARI, Alessan-dro. \IL2/cmr/m/it/12 Stei-ner Tree NP-comp
 leteness Proof \IL2/cmr/m/n/12 [on-
  []
@@ -648,37 +648,37 @@ leteness Proof \IL2/cmr/m/n/12 [on-
 <obr/time1.png, id=87, 305.34074pt x 213.1965pt>
 File: obr/time1.png Graphic file (type png)
  <use obr/time1.png>
-Package pdftex.def Info: obr/time1.png used on input line 588.
+Package pdftex.def Info: obr/time1.png used on input line 591.
 (pdftex.def)             Requested size: 350.99762pt x 245.09598pt.
 
 <obr/time2.png, id=88, 312.56775pt x 212.59425pt>
 File: obr/time2.png Graphic file (type png)
  <use obr/time2.png>
-Package pdftex.def Info: obr/time2.png used on input line 594.
+Package pdftex.def Info: obr/time2.png used on input line 597.
 (pdftex.def)             Requested size: 350.99762pt x 238.73325pt.
 
 <obr/time3.png, id=89, 316.18124pt x 213.1965pt>
 File: obr/time3.png Graphic file (type png)
  <use obr/time3.png>
-Package pdftex.def Info: obr/time3.png used on input line 600.
+Package pdftex.def Info: obr/time3.png used on input line 603.
 (pdftex.def)             Requested size: 350.99762pt x 236.68994pt.
 
 <obr/acc1.png, id=90, 392.46625pt x 287.0725pt>
 File: obr/acc1.png Graphic file (type png)
  <use obr/acc1.png>
-Package pdftex.def Info: obr/acc1.png used on input line 606.
+Package pdftex.def Info: obr/acc1.png used on input line 609.
 (pdftex.def)             Requested size: 292.5pt x 213.96344pt.
 
 <obr/acc2.png, id=91, 415.5525pt x 284.06125pt>
 File: obr/acc2.png Graphic file (type png)
  <use obr/acc2.png>
-Package pdftex.def Info: obr/acc2.png used on input line 612.
+Package pdftex.def Info: obr/acc2.png used on input line 615.
 (pdftex.def)             Requested size: 292.5pt x 199.95111pt.
 
 <obr/acc3.png, id=92, 249.93375pt x 159.59625pt>
 File: obr/acc3.png Graphic file (type png)
  <use obr/acc3.png>
-Package pdftex.def Info: obr/acc3.png used on input line 618.
+Package pdftex.def Info: obr/acc3.png used on input line 621.
 (pdftex.def)             Requested size: 292.5pt x 186.79501pt.
  [20 <./obr/time1.png>] [21 <./obr/time2.png> <./obr/time3.png>] [22 <./obr/acc
 1.png> <./obr/acc2.png>] [23 <./obr/acc3.png>] (./zprava.aux) ) 
@@ -706,7 +706,7 @@ ublic/cs/csr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cs/csr8.pfb
 ></usr/share/texlive/texmf-dist/fonts/type1/public/cs/csti10.pfb></usr/share/te
 xlive/texmf-dist/fonts/type1/public/cs/csti12.pfb></usr/share/texlive/texmf-dis
 t/fonts/type1/public/cs/cstt12.pfb>
-Output written on zprava.pdf (23 pages, 345790 bytes).
+Output written on zprava.pdf (23 pages, 346790 bytes).
 PDF statistics:
  163 PDF objects out of 1000 (max. 8388607)
  104 compressed objects within 2 object streams

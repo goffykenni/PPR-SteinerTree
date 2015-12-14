@@ -23,7 +23,7 @@
 %\parindent=15pt\parskip=2pt
 
 \begin{center}
-\bf Semestralní projekt MI-PAR 2010/2011:\\[5mm]
+\bf Semestralní projekt MI-PAR 2015/2016:\\[5mm]
     Paralelní algoritmus pro hledání minimálního Steinerova stromu	\\[5mm]
        Libor Vytlačil\\
        Vladimír Mlázovský\\[2mm]
@@ -38,7 +38,7 @@ magisterské studijum, FIT ČVUT, Kolejní 550/2, 160 00 Praha 6\\[2mm]
 \newpage
 \section{Definice problému a popis sekvenčního algoritmu}
 \subsection{Formulace řešeného problému}
-Nejprve zformulujeme problém, který naše úloha řeší a vysvětlíme potřebné pojmy.
+Nejprve zformulujeme problém, který naše úloha řeší, a vysvětlíme potřebné pojmy.
 
 Pro zadaný graf\footnote{Předpokládá se souvislý neorientovaný neohodnocený konečný graf bez smyček. Tento předpoklad platí pro každý výskyt pojmu graf v této práci, není-li explicitně řečeno jinak.} $G=(V,E)$
 a množinu $\emptyset\neq A\subseteq V(G)$ nalezněte minimální\footnote{z hlediska počtu uzlů} Steinerův strom $T_A$.
@@ -92,7 +92,7 @@ stavový prostor úlohy a ověřuje jednotlivé stavy (viz dále).
 Stavový prostor úlohy je konečný a lze ho vzájemně jednoznačně namapovat na podmnožiny $B\subseteq V(G), A\cap B = \emptyset$.
 Ověření jednoho stavu pak odpovídá zjištění, zda-li na uzlech množiny $A\cup B$ existuje
 v grafu strom. Pokud ano, jde o Steinerův strom pro množinu $A$. Cílem je tento strom, a tedy velikost
-množiny $B$ minimalizovat. Ve skutečnosti lze ale použít drobnou optimalizaci, kterou
+množiny $B$, minimalizovat. Ve skutečnosti lze ale použít drobnou optimalizaci, kterou
 také náš program využívá.
 
 Nemusíme totiž testovat, zda-li na $A\cup B$ existuje strom, ale pouze,
@@ -105,7 +105,7 @@ zapamatuje uzly v této množině.
 Při procházení stavovým prostorem s výhodou využíváme možnosti prořezávání. Jakmile
 jednou najdeme nějakou vyhovující množinu $B$, už nemusíme testovat stavy, které odpovídají množinám o velikosti $l \geq B$.
 
-Po skončení průchodu stavového stromu nalezl program takovou množinu $B_{min}\subseteq G(V), A\cap B = \emptyset$, že podgraf indukovaný množinou vrcholů $A\cup B_{min}$ je souvislý, a menší množina $B$ těchto vlastností neexistuje.
+Po skončení průchodu stavového stromu nalezl program takovou množinu $B_{\min}\subseteq G(V), A\cap B_{\min} = \emptyset$, že podgraf indukovaný množinou vrcholů $A\cup B_{\min}$ je souvislý, a menší množina $B$ těchto vlastností neexistuje.
 
 Program pak sestrojí kostru zmíněného podgrafu, která je hledaným minimálním Steinerovým stromem.
 
@@ -142,7 +142,7 @@ Obrázek \ref{imgStavy} ukazuje vizualizaci stavového stromu.
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.8\textwidth]{obr/stavy.png}
-	\caption{Vizualizace stavového prostoru pro $|V(G)|-A=3$. Množina $B$ pro daný stav obsahuje ty vrcholy grafu, jejichž čísla
+	\caption{Vizualizace stavového prostoru pro $|V(G)|-A=4$. Množina $B$ pro daný stav obsahuje ty vrcholy grafu, jejichž čísla
 		se vyskytují na cestě z tohoto stavu směrem do kořene. (Samotný kořen, který odpovídá prázdné množině, není zobrazen.)}
 	\label{imgStavy}
 \end{figure}
@@ -154,9 +154,9 @@ Steinerova stromu úlohou s omezenou velikostí stavového prostoru, která opti
 \paragraph{Odhad časové složitosti algoritmu}\mbox{}\newline
 V našem řešení lze snadno nahlédnou velikost stavového stromu, tj. počet jeho uzlů.
 Tato velikost je rovna číslu $2^{|V(G)|-|A|}$, což odpovídá počtu podmnožin množiny o 
-$|V(G)|-|A|$ prvcích. Přímo to vyplývá z popisu průchodu stavovým prostorem a pomoci přiblížit to může obrázek \ref{imgWorst}.
+$|V(G)|-|A|$ prvcích. Přímo to vyplývá z popisu průchodu stavovým prostorem a pomoci přiblížit to může obrázek \ref{imgStavy}.
 
-Skutečný počet testovaných stavů může být nižší díky prořezávání. Přesto je možné snadno nalézt graf $G=(V,E)$ a terminální množinu $A$ tak, aby program skutečně musel projít úplně celý stavový prostor. Jedno takové zadání je na obrázku a obecně jde o případ, kdy je
+Skutečný počet testovaných stavů může být nižší díky prořezávání. Přesto je možné snadno nalézt graf $G=(V,E)$ a terminální množinu $A$ tak, aby program skutečně musel projít úplně celý stavový prostor. Jedno takové zadání je na obrázku \ref{imgWorst} a obecně jde o případ, kdy je
 $G$ strom a $A$ obsahuje právě všechny jeho listy.
 \begin{figure}[ht]
 	\centering
@@ -169,9 +169,10 @@ $G$ strom a $A$ obsahuje právě všechny jeho listy.
 Nejsložitější operací v cyklu systematického procházení stavů je testování souvislosti
 grafu. Protože graf interně representujeme pomocí matice sousednosti, testujeme souvislost algoritmem přirozeným pro tuto representaci, který má časovou složitost $O(|E(G)|^2)$.
 
-Jiné grafové representace by asi umožnili efektivnější testování souvislosti, ale my jsme zůstali u tohoto řešení, neboť to nijak nemění cíl a výsledek práce a zároveň je tato representace interně výhodná pro jednoduché testování souvislosti indukovaných podgrafů.
+Jiné grafové representace by asi umožnili efektivnější testování souvislosti, ale my jsme zůstali u tohoto řešení, neboť to nijak nemění cíl a výsledek práce a zároveň je tato representace interně výhodná pro jednoduché testování souvislosti indukovaných podgrafů. Otestování
+souvislosti indukovaného podgrafu o $k$ hranách trvá asymptoticky čas $O(k^2)$.
 
-Složitost sekvenčního řešení v nejhorším případě je tedy asymptoticky rovna $\Theta(2^{|V(G)|-|A|}\cdot |E(G)|^2)$.
+Složitost sekvenčního řešení v nejhorším případě je tedy asymptoticky rovna $O(2^{|V(G)|-|A|}\cdot |E(G)|^2)$.
 
 
 
@@ -216,12 +217,12 @@ a podle něj si vytvoří příslušné datové struktury. Poté proces číslo 
 iniciální rozdělení práce a to tak, že dostatečně rozvine stavový prostor a jeho kusy pošle ostatním procesům,
 kteří si podle toho aktualizují svůj zásobník a kontext.
 
-Procesy pak vstoupí do hlavního výpočetního cyklu, kde podobně jako v sekvenčním případě, rozvíjí a ověřují
+Procesy pak vstoupí do hlavního výpočetního cyklu, kde, podobně jako v sekvenčním případě, rozvíjí a ověřují
 stavy v jim přidělené části stavového prostoru. Hlavní rozdíl spočívá ve dvou věcech.
 \begin{itemize}
-	\item Procesy pravidelně po jistém počtu kroků průchodu cyklem (viz níže) kontrolují svou frontu zpráv. V případě,
+	\item Procesy pravidelně po jistém počtu průchodů cyklem (viz níže) kontrolují svou frontu zpráv. V případě,
 	že nějaká zpráva dorazila, na to patřičně reagují.
-	\item Pokud se procesu vyprázdní zásobník, nemůže cyklus jen tak opustit. Musí si nalézt dárce, který
+	\item Pokud se procesu vyprázdní zásobník, nemůže cyklus jen tak opustit. Musí se pokusit hledat dárce, který
 	mu přidělí práci novou. Opustit cyklus je možné až ve chvíli, kdy dorazí odpovídající zpráva, která explicitně
 	oznamuje, že byl zpracován celý stavový prostor a výpočet může končit.
 \end{itemize}
@@ -256,11 +257,13 @@ Procesy si mezi sebou vyměňují několik typů zpráv. Význam shrnuje násled
 Když všechny procesy opustí výpočetní cyklus, je potřeba vypsat nalezené řešení.
 Obecně nevíme, který proces toto řešení má. Může se dokonce stát, že budou mít dva procesy
 různá řešení, protože, jak už bylo řečeno, nemusí být minimální Steinerův strom určen jednoznačně.
+Připomeňme (viz část \ref{subPrincip}), že v tuto chvíli má řešení podobu souvislého indukovaného podgrafu, jehož kostra
+je hledaný minimální Steinerův strom.
 
 Provedeme tedy paralelní binární redukci (s využitím příslušné funkce MPI), jejímž výsledkem bude velikost
-minimálního Steinerova stromu a nejmenší index procesu $i$ takový, že proces $i$ nalezl strom této velikosti. Tento výsledek
-paralelní binární redukce bude uložen v procesu $0$. Pokud $i=0$, pak sám tento proces vypíše řešení, jinak pošle zprávu procesu $i$,
-který výpis provede. Pak program může skončit.
+minimálního Steinerova stromu a nejmenší index procesu $i$ takový, že proces $i$ nalezl souvislý indukovaný podgraf této velikosti. Tento výsledek
+paralelní binární redukce bude uložen v procesu $0$. Pokud $i=0$, pak sám tento proces sestrojí kostru tohoto grafu a vypíše řešení, jinak pošle zprávu procesu $i$,
+který tyto kroky provede. Pak program může skončit.
 
 \subsection{Klíčové části paralelní implementace}\label{subParkey}
 \paragraph{Formát posílaných zpráv}
@@ -332,7 +335,7 @@ si lze učinit následující úvahou
 \end{proof}
 
 \paragraph{Způsob dělení zásobníku}
-V paralelní implementaci používáme jako zásobník datovou strukturu v podobě oboustrannou fronty, která umožňuje v čase $O(1)$ přidávat i odebírat
+V paralelní implementaci používáme jako zásobník datovou strukturu v podobě oboustranné fronty, která umožňuje v čase $O(1)$ přidávat i odebírat
 rámce ze svého začátku i konce.
 
 Procesor během výpočtu zpracovává stavy z jednoho konce zásobníku (vrcholu) směrem ke druhému (dno). Platí důležitá vlastnost. Předpokládáme-li
@@ -348,7 +351,7 @@ se už v procesu aktuálně přiděleném stavovém podprostoru nikde neobjeví 
 
 Právě z tohoto rámce proces-dárce přiděluje práci a to následovně.
 \begin{enumerate}
-	\item Pokud rámec na dně obsahuje \uv{dostatečný počet} podstavů (viz dále), přidělí žadateli
+	\item Pokud rámec na dně obsahuje \uv{dostatečný počet} podstavů (viz dále), přidělí dárce žadateli
 	jeho největšího potomka (spolu s patřičným kontextem) a sám si jej ze svého prostoru
 	odstraní.
 	\item V opačném případě, kdy rámec dna už nemá dostatečný počet podstavů, ale zároveň
@@ -510,17 +513,17 @@ možnosti vylepšení taktiky hledání dárce a taktiky rozdělení zásobníku
 Zbylé dvě instance ukazují typičtější chování naší implementace v případě, že je na vstupu
 zadán nějaký pseudonáhodně vygenerovaný graf.
 
-Typicky se v takovém případě stane, že vstup má tak \uv{šťastnou} podobu, že při sekvenčním řešení
+Typicky se v takovém případě stane, že vstup má tak \uv{šťastnou} podobu, že při sekvenčním řešení procesor
 rychle narazí na nějaký dobrý horní odhad velikosti řešení, a je tudíž schopen prořezat velkou část stavového prostoru.
 
 Necháme-li pak tutéž instanci řešit o několik procesorů více, není tím tato výhoda překonána. Podoba vstupu umožňuje
-relativně brzy proříznout tak velkou část stavového prostoru, že se na jeho zbytku vůbec neprojeví fakt, že úlohu řeší
-větší počet procesorů. Přesně tohle ukazují naměřené hodnoty pro instanci $G_2$.
+relativně brzy proříznout tak velkou část stavového prostoru, že se na jeho zbytku pozitivně vůbec neprojeví fakt, že úlohu řeší
+větší počet procesorů. Přesně tohle ukazují naměřené hodnoty pro instanci $G_2$ pro $2$ až $6$ procesorů.
 
 Druhým typickým jevem pak je superlineární zrychlení, které \uv{náhle} nastane při jistém počtu procesorů. Vidět je to
 u obou instancí $G_2, G_3$. To je způsobeno tím, že do jistého počtu $n$ řešících procesorů zůstává nějaký
 dobrý horní odhad velikosti řešení ukryt hluboko ve stavovém prostoru jistého procesoru a trvá dlouho, než na něj tento procesor narazí a nebo
-jej daruje nějakému žadateli.
+daruje odpovídající podprostor nějakému žadateli.
 
 Jakmile však řeší úlohu o jeden procesor víc, dojde k tomu, že nyní již existuje dostatečný počet žadatelů na to, aby
 byl podprostor obsahující tento odhad relativně rychle předán nějakému žadateli, který tento odhad nalezne, následně jeho velikost
@@ -534,7 +537,7 @@ Dynamické vyvažování zátěže přímo souvisí s taktikou hledání dárce 
 popsány v části \ref{subParkey}.
 
 Naše implementace dynamického vyvažování zátěže má své výhody a nevýhody. Samotná operace rozdělení
-zásobníku proběhne vždy v čase $O(1)$, dárce tedy není při dělení nijak zbytečně časově zatížen, což je výhoda.
+zásobníku trvá dárci vždy čas $O(1)$, dárce tedy není při dělení nijak zbytečně časově zatížen, což je výhoda.
 Celková časová složitost komunikace mezi žadatelem a dárcem je tak v podstatě dána čistě časem potřebným k přenosu
 zpráv s žádostí a odpovědí.
 
@@ -547,7 +550,7 @@ Při rozboru měřené instance $G_1$ jsme viděli, při větším počtu proces
 implementace dělení zásobníku a taktiky lokálních cyklických žádostí úplně ideální, neboť způsobuje, že nezanedbatelně
 velké procento žádostí o přidělení nové práce skončí neúspěchem.
 
-\paragraph{Meze pro rozklad výpočtu}
+\paragraph{Meze pro rozklad výpočtu}\mbox{}\newline
 Empiricky jsme stanovili, že nemá význam posílat procesům žádajícím o práci stavové podprostory
 obsahující méně než $2^{15}$ stavů.
 
@@ -562,17 +565,17 @@ pomocí systematického prohledávání stavového prostoru.
 Následně jsme řešení paralelizovali za pomoci knihovny MPI, která nám umožnila
 zajistit zprávově orientovanou komunikaci mezi procesy, implementací jednoduchého
 stavového automatu, který sleduje činnost každého procesu účastnícího se výpočtu, a 
-realizací možnosti dynamicky vyvažovat výpočetní zátěž.s
+realizací možnosti dynamicky vyvažovat výpočetní zátěž.
 
 Na třech ukázkových instancí jsme naměřili paralelní časy a diskutovali jsme nad výsledky.
 Co se týká návrhu na zlepšení, stálo by za to zamyslet se nad lepší taktikou dělení zásobníku
-a hledáním dárce, které by dohromady zvýšili procento aktivních cyklů v hlavním výpočetním cyklu procesů.
+a hledáním dárce, které by dohromady zvýšily procento aktivních cyklů v hlavním výpočetním cyklu procesů.
 \paragraph{Osobní poznatky a zkušenosti}\mbox{}
 \paragraph{Libor Vytlačil:} Seznámil jsem se s mně doposud neznámou knihovnou MPI a získal
 jsem základní zkušenost a poznatky při implementaci paralelní aplikace pomocí této knihovny.
 
 \paragraph{Vladimír Mlázovský:} Oživil jsem si programování v C++ a zamyslel jsem se hlouběji nad paralelizací problému. Nenapadlo
-by mě, že je až takový rozdíl mezi programováním vícevláknové aplikace a aplikaci pro paralelní stroj.
+by mě, že je až takový rozdíl mezi programováním vícevláknové aplikace a aplikace pro paralelní stroj.
 \addcontentsline{toc}{section}{Reference}
 \begin{thebibliography}{9}
 	\bibitem{pars}

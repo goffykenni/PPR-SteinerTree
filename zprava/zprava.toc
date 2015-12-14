@@ -17,7 +17,7 @@
 \contentsline {paragraph}{Sd\IeC {\'\i }len\IeC {\'\i } d\IeC {\'\i }l\IeC {\v c}\IeC {\'\i }ch v\IeC {\'y}sledk\IeC {\r u}}{11}
 \contentsline {paragraph}{Zp\IeC {\r u}sob d\IeC {\v e}len\IeC {\'\i } z\IeC {\'a}sobn\IeC {\'\i }ku}{12}
 \contentsline {paragraph}{Zp\IeC {\r u}sob ukon\IeC {\v c}en\IeC {\'\i } v\IeC {\'y}po\IeC {\v c}tu}{13}
-\contentsline {paragraph}{Shrnut\IeC {\'\i } d\IeC {\r u}le\IeC {\v z}it\IeC {\'y}ch v\IeC {\'y}po\IeC {\v c}etn\IeC {\'\i }ch konstant}{13}
+\contentsline {paragraph}{Shrnut\IeC {\'\i } d\IeC {\r u}le\IeC {\v z}it\IeC {\'y}ch v\IeC {\'y}po\IeC {\v c}etn\IeC {\'\i }ch konstant}{14}
 \contentsline {section}{\numberline {3}Nam\IeC {\v e}\IeC {\v r}en\IeC {\'e} v\IeC {\'y}sledky a vyhodnocen\IeC {\'\i }}{15}
 \contentsline {paragraph}{Instance zvolen\IeC {\'e} pro m\IeC {\v e}\IeC {\v r}en\IeC {\'\i }}{15}
 \contentsline {subsection}{\numberline {3.1}Paraleln\IeC {\'\i } \IeC {\v c}as a paraleln\IeC {\'\i } zrychlen\IeC {\'\i }}{15}
