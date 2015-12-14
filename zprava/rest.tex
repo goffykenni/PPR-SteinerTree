@@ -1,0 +1,58 @@
+\section{Literatura}
+
+\appendix
+
+\section{Návod pro vkládání grafů a obrázků do Latexu}
+
+Nejjednodušší způsob vytvoření obrázku je použít vektorový grafický
+editor (např. xfig nebo jfig), ze kterého lze exportovat buď
+\begin{itemize}
+\item postscript formáty (ps nebo eps formát) nebo
+\item latex formáty (v pořadí prostý latex, latex s macry epic, eepic, eepicemu). Uvedené pořadí odpovídá růstu
+komplikovanosti obrázků který formát podporuje (prostá latex macra
+umožnují pouze jednoduché, epic makra něco mezi, je třeba
+vyzkoušet).
+
+\end{itemize}
+Následující příklady platí pro všechny případy.
+
+Obrázek v postscriptu, vycentrovaný a na celou šířku stránky, s
+popisem a číslem. Všimnete si, jak řídit velikost obrazku.
+\begin{figure}[ht]
+\epsfysize=3cm \centerline{\epsfbox{VasObrazek.ps}} \caption{Popis
+vašeho obrazku} \label{labelvasehoobrazku}
+\end{figure}
+
+Obrázek pouze vložený mezi řádky textu, bez popisu a číslování.\\
+\epsfxsize=1cm
+\rule{0pt}{0pt}\hfill\epsfbox{VasObrazek.ps}\hfill\rule{0pt}{0pt}
+
+Latexovské obrázky maji přípony *.latex, *.epic, *.eepic, a
+*.eepicemu, respective.
+\begin{figure}[ht]
+\begin{center}
+\input VasObrazek.latex
+\end{center}
+\caption{Popis vašeho obrázku} \label{l1}
+\end{figure}
+Vypuštením závorek {\tt figure} dostanete opět pouze rámeček v textu
+bez čísla a popisu.
+
+Takhle jednoduše můžete poskládat obrázky vedle sebe.
+\begin{center}
+\setlength{\unitlength}{0.1mm}\input VasObrazek.epic
+\hglue 5mm
+\setlength{\unitlength}{0.15mm}\input VasObrazek.eepic
+\hglue 5mm
+\setlength{\unitlength}{0.2mm}\input VasObrazek.eepicemu
+\end{center}
+Řídit velikost latexovskych obrázků lze příkazem
+\begin{verbatim}
+\setlength{\unitlength}{0.1mm}
+\end{verbatim}
+které mění měřítko rastru obrázku, Tyto příkazy je ale současně
+nutné vyhodit ze souboru, který xfig vygeneroval.
+
+Pro vytváření grafu lze použít program gnuplot, který umí generovat
+postscriptovy soubor, ktery vložíte do Latexu výše uvedeným
+způsobem.

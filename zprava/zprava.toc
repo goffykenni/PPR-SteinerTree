@@ -1,0 +1,35 @@
+\select@language {czech}
+\contentsline {section}{\numberline {1}Definice probl\IeC {\'e}mu a popis sekven\IeC {\v c}n\IeC {\'\i }ho algoritmu}{3}
+\contentsline {subsection}{\numberline {1.1}Formulace \IeC {\v r}e\IeC {\v s}en\IeC {\'e}ho probl\IeC {\'e}mu}{3}
+\contentsline {subsection}{\numberline {1.2}Vstupn\IeC {\'\i } a v\IeC {\'y}stupn\IeC {\'\i } data algoritmu}{3}
+\contentsline {paragraph}{Vstupn\IeC {\'\i } data}{3}
+\contentsline {paragraph}{V\IeC {\'y}stupn\IeC {\'\i } data}{4}
+\contentsline {subsection}{\numberline {1.3}Princip \IeC {\v r}e\IeC {\v s}en\IeC {\'\i }}{4}
+\contentsline {paragraph}{Systematick\IeC {\'y} pr\IeC {\r u}chod stavov\IeC {\'y}m prostorem}{5}
+\contentsline {subsection}{\numberline {1.4}Vlastnosti a \IeC {\v c}asov\IeC {\'a} slo\IeC {\v z}itost algoritmu}{7}
+\contentsline {paragraph}{Klasifikace \IeC {\'u}lohy}{7}
+\contentsline {paragraph}{Odhad \IeC {\v c}asov\IeC {\'e} slo\IeC {\v z}itosti algoritmu}{7}
+\contentsline {section}{\numberline {2}Popis paraleln\IeC {\'\i }ho algoritmu a jeho implementace v MPI}{8}
+\contentsline {subsection}{\numberline {2.1}Princip paraleln\IeC {\'\i } implementace}{8}
+\contentsline {subsection}{\numberline {2.2}Kl\IeC {\'\i }\IeC {\v c}ov\IeC {\'e} \IeC {\v c}\IeC {\'a}sti paraleln\IeC {\'\i } implementace}{10}
+\contentsline {paragraph}{Form\IeC {\'a}t pos\IeC {\'\i }lan\IeC {\'y}ch zpr\IeC {\'a}v}{10}
+\contentsline {paragraph}{Taktika hled\IeC {\'a}n\IeC {\'\i } d\IeC {\'a}rce}{11}
+\contentsline {paragraph}{Sd\IeC {\'\i }len\IeC {\'\i } d\IeC {\'\i }l\IeC {\v c}\IeC {\'\i }ch v\IeC {\'y}sledk\IeC {\r u}}{11}
+\contentsline {paragraph}{Zp\IeC {\r u}sob d\IeC {\v e}len\IeC {\'\i } z\IeC {\'a}sobn\IeC {\'\i }ku}{12}
+\contentsline {paragraph}{Zp\IeC {\r u}sob ukon\IeC {\v c}en\IeC {\'\i } v\IeC {\'y}po\IeC {\v c}tu}{13}
+\contentsline {paragraph}{Shrnut\IeC {\'\i } d\IeC {\r u}le\IeC {\v z}it\IeC {\'y}ch v\IeC {\'y}po\IeC {\v c}etn\IeC {\'\i }ch konstant}{13}
+\contentsline {section}{\numberline {3}Nam\IeC {\v e}\IeC {\v r}en\IeC {\'e} v\IeC {\'y}sledky a vyhodnocen\IeC {\'\i }}{15}
+\contentsline {paragraph}{Instance zvolen\IeC {\'e} pro m\IeC {\v e}\IeC {\v r}en\IeC {\'\i }}{15}
+\contentsline {subsection}{\numberline {3.1}Paraleln\IeC {\'\i } \IeC {\v c}as a paraleln\IeC {\'\i } zrychlen\IeC {\'\i }}{15}
+\contentsline {subsection}{\numberline {3.2}Rozbor nam\IeC {\v e}\IeC {\v r}en\IeC {\'y}ch hodnot}{15}
+\contentsline {paragraph}{Rozbor instance $G_1$}{15}
+\contentsline {paragraph}{Rozbor instanc\IeC {\'\i } $G_2$ a $G_3$}{17}
+\contentsline {subsection}{\numberline {3.3}Dynamick\IeC {\'e} vyva\IeC {\v z}ov\IeC {\'a}n\IeC {\'\i } z\IeC {\'a}t\IeC {\v e}\IeC {\v z}e a granularita implementace}{18}
+\contentsline {paragraph}{Hled\IeC {\'a}n\IeC {\'\i } d\IeC {\'a}rce a d\IeC {\v e}len\IeC {\'\i } z\IeC {\'a}sobn\IeC {\'\i }ku}{18}
+\contentsline {paragraph}{Meze pro rozklad v\IeC {\'y}po\IeC {\v c}tu}{19}
+\contentsline {section}{\numberline {4}Z\IeC {\'a}v\IeC {\v e}r}{19}
+\contentsline {paragraph}{Osobn\IeC {\'\i } poznatky a zku\IeC {\v s}enosti}{19}
+\contentsline {paragraph}{Libor Vytla\IeC {\v c}il:}{19}
+\contentsline {paragraph}{Vladim\IeC {\'\i }r Ml\IeC {\'a}zovsk\IeC {\'y}:}{19}
+\contentsline {section}{Reference}{19}
+\contentsline {section}{P\IeC {\v r}\IeC {\'\i }lohy}{20}
